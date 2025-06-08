@@ -1,0 +1,158 @@
+openapi: 3.0.3
+info:
+  title: sevise 
+  description: |-
+    test servise
+  version: '1'
+
+servers:
+  - url: http://localhost:8080
+tags:
+  - name: user
+    description: Operations about user
+paths:
+  /:
+    get:
+      tags:
+        - user
+      summary: return list name
+      description: return list name
+      operationId: GetList
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/UserList'         
+    post:
+      tags:
+        - user
+      summary: Add user in list
+      description: Add user anf get his id
+      operationId: addUser
+      parameters:
+        - name: name
+          in: query
+          description: name user
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+             text/plain:
+              schema:
+                $ref: '#/components/schemas/UserID' 
+  /{id}:
+    get:
+      tags:
+        - user
+      summary: get user by id
+      description: get user by id
+      operationId: getUserById
+      parameters:
+        - name: id
+          in: path
+          description: 'id user in list'
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful operation
+          content:
+             text/plain:
+              schema:
+                $ref: '#/components/schemas/User' 
+        '400':
+          description: Bad Request
+    put:
+      tags:
+        - user
+      summary: Update user
+      description: This can only be done by the logged in user.
+      operationId: updateUser
+      parameters:
+        - name: id
+          in: path
+          description: 'name that need to be deleted'
+          required: true
+          schema:
+            type: integer
+        - name: name
+          in: query
+          description: 'Update an existent user in the store'
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User updated successfuly
+        '400':
+          description: Bad request
+    delete:
+      tags:
+        - user
+      summary: Delete user
+      description: This can only be done by the logged in user.
+      operationId: deleteUser
+      parameters:
+        - name: id
+          in: path
+          description: The ID that needs to be deleted
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+            description: User deleted successfully
+        '400':
+          description: Bad request
+components:
+  schemas:
+    Order:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 10
+        petId:
+          type: integer
+          format: int64
+          example: 198772
+        quantity:
+          type: integer
+          format: int32
+          example: 7
+        shipDate:
+          type: string
+          format: date-time
+        status:
+          type: string
+          description: Order Status
+          example: approved
+          enum:
+            - placed
+            - approved
+            - delivered
+        complete:
+          type: boolean
+      xml:
+        name: order
+    User:
+      type: string
+      example: 'Alise'
+      xml:
+        name: user
+    UserList:
+      type: string
+      example: |-
+        0 Tom
+        1 Alise
+        2 Max
+    UserID:
+      type: integer
+      example: 0
