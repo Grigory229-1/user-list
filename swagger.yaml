@@ -31,13 +31,13 @@ paths:
       summary: Add user in list
       description: Add user anf get his id
       operationId: addUser
-      parameters:
-        - name: name
-          in: query
-          description: name user
-          required: false
-          schema:
-            type: string
+      requestBody:
+        description: Add new user in the list
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddUser'
+        required: true    
       responses:
         '200':
           description: Successful operation
@@ -83,10 +83,19 @@ paths:
             type: integer
         - name: name
           in: query
-          description: 'Update an existent user in the store'
-          required: true
+          description: 'Update the first name of user in the list'
           schema:
             type: string
+        - name: lastname
+          in: query
+          description: 'Update the last name of user in the list'
+          schema:
+            type: string    
+        - name: age
+          in: query
+          description: 'Update the age of user in the list'
+          schema:
+            type: integer    
       responses:
         '200':
           description: User updated successfuly
@@ -112,47 +121,34 @@ paths:
           description: Bad request
 components:
   schemas:
-    Order:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-          example: 10
-        petId:
-          type: integer
-          format: int64
-          example: 198772
-        quantity:
-          type: integer
-          format: int32
-          example: 7
-        shipDate:
-          type: string
-          format: date-time
-        status:
-          type: string
-          description: Order Status
-          example: approved
-          enum:
-            - placed
-            - approved
-            - delivered
-        complete:
-          type: boolean
-      xml:
-        name: order
     User:
       type: string
-      example: 'Alise'
+      example: 'Alise Bradley 20'
       xml:
         name: user
+    AddUser:
+      required:
+      - name
+      - lastname
+      - age
+      type: object
+      properties:
+        name:
+          type: string
+          example: Max
+        lastname:
+          type: string
+          example: Cooper
+        age:
+          type: integer
+          format: int64
+          example: 10  
     UserList:
       type: string
       example: |-
-        0 Tom
-        1 Alise
-        2 Max
+        0 Tom Adams 15
+        1 Alise Bradley 20
+        2 Max Cooper 30
     UserID:
       type: integer
       example: 0
