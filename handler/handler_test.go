@@ -1,9 +1,11 @@
 package handler
 
 import (
+	"bytes"
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"project/structs"
 	"testing"
 
 	"github.com/julienschmidt/httprouter"
@@ -13,42 +15,55 @@ import (
 type TestService struct {
 }
 
-func (s *TestService) SetUsers(users []string) {}
-func (s *TestService) Get() []string {
-	return []string{"ALise", "MAx"}
+func (s *TestService) SetUsers(users []structs.User) {}
+func (s *TestService) Get() []*structs.User {
+	return []*structs.User{
+		{
+			Name:     "Alise",
+			Lastname: "Alise2",
+			Age:      12,
+		},
+		{
+			Name:     "Max",
+			Lastname: "Alise2",
+			Age:      0,
+		},
+	}
 }
-func (s *TestService) Post(name string) int {
-	if name == "Alise"{
+func (s *TestService) Post(name, lastname string, age uint) int {
+	if name == "Alise" {
 		return 0
-	} 
+	}
 	return 1
 }
 func (s *TestService) Delete(idStr string) error {
-	if idStr == "1"{
-		return errors.New("user not found")
-	}
-	return nil
-}
-func (s *TestService) UpdateUser(idStr string, newName string) error {
 	if idStr == "1" {
 		return errors.New("user not found")
 	}
 	return nil
 }
-func (s *TestService) GetUser(idStr string) (string, error) {
-	if idStr == "0" {
-		return "Alise", nil
+func (s *TestService) UpdateUser(idStr string, name, lastname string, age string) error {
+	if idStr == "1" {
+		return errors.New("user not found")
 	}
-	return "", errors.New("user not found")
+	return nil
+}
+func (s *TestService) GetUser(idStr string) (*structs.User, error) {
+	if idStr == "0" {
+		return &structs.User{
+			Name:     "Alise",
+			Lastname: "Alise2",
+			Age:      12,
+		}, nil
+	}
+	return nil, errors.New("user not found")
 }
 
 func NewTestService() *TestService {
 	return &TestService{}
 }
 func TestGetList(t *testing.T) {
-	result := `0 ALise
-1 MAx
-`
+	result := "0: Alise Alise2, Age: 12\n1: Max Alise2, Age: 0\n"
 	h := NewHandler(NewTestService())
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("", "/", nil)
@@ -62,7 +77,7 @@ func TestGetList(t *testing.T) {
 // ////////////////////////////////////////////////////////
 func TestGetUser(t *testing.T) {
 
-	result := "Alise\n"
+	result := "Alise Alise2 12\n"
 	h := NewHandler(NewTestService())
 	w := httptest.NewRecorder()
 	w1 := httptest.NewRecorder()
@@ -78,19 +93,21 @@ func TestGetUser(t *testing.T) {
 }
 
 func TestAddUser(t *testing.T) {
-
+	data := []byte(`{
+    "name":"Alise",
+    "lastname":"ALise2",
+    "age":1
+}`)
+	body := bytes.NewReader(data)
 	h := NewHandler(NewTestService())
 	w := httptest.NewRecorder()
-	r := httptest.NewRequest("POST", "/user?name=Alise", nil)
+	r := httptest.NewRequest("POST", "/", body)
 	p := httprouter.Params{}
 	h.AddUser(w, r, p)
-		
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.Equal(t, "0", w.Body.String())
 }
-
-
 
 func TestUppdateUser(t *testing.T) {
 	h := NewHandler(NewTestService())
