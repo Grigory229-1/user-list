@@ -35,7 +35,7 @@ func (h *Handler) GetList(w http.ResponseWriter, r *http.Request, _ httprouter.P
 	//Проверка длины строки
 	if len(list) == 0 {
 
-		log.Println("Not found")
+		log.Println("Get list is empty")
 		fmt.Fprint(w, "Not found\n")
 	}
 	for key, value := range list {
@@ -45,7 +45,9 @@ func (h *Handler) GetList(w http.ResponseWriter, r *http.Request, _ httprouter.P
 
 			fmt.Fprintf(w, "%d: [Delited user]\n", key)
 		}
+
 	}
+	log.Println("Userlist was called succsseefuly")
 }
 
 // GetUser обработчик для получения конкретного пользователя по ID
@@ -59,6 +61,7 @@ func (h *Handler) GetUser(w http.ResponseWriter, r *http.Request, p httprouter.P
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	log.Printf("User with id %v was called succsseefuly\n", id)
 	fmt.Fprintf(w, "%v %v %v\n", user.Name, user.Lastname, user.Age)
 }
 
@@ -83,12 +86,14 @@ func (h *Handler) AddUser(w http.ResponseWriter, r *http.Request, _ httprouter.P
 	}
 
 	if user.Name == "" || user.Lastname == "" {
+		log.Println("User name or lastname are empty")
 		http.Error(w, "User name or lastname are empty", http.StatusBadRequest)
 		return
 	}
 
 	//todo:получить данные из body
 	id := h.service.Post(user.Name, user.Lastname, user.Age)
+	log.Printf("User with id %v was added succsseefuly\n", id)
 	fmt.Fprint(w, id)
 
 }
@@ -104,6 +109,7 @@ func (h *Handler) DeleteUser(w http.ResponseWriter, r *http.Request, p httproute
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	log.Printf("User with id %v deleted successfully\n", id)
 	fmt.Fprint(w, "User deleted successfully")
 }
 
@@ -122,5 +128,6 @@ func (h *Handler) UpdateUser(w http.ResponseWriter, r *http.Request, p httproute
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	log.Printf("User with id %v updated successfully\n", id)
 	fmt.Fprint(w, "User update successfully")
 }
