@@ -6,12 +6,12 @@ info:
   version: '1'
 
 servers:
-  - url: http://localhost:8080
+  - url: http://localhost:80
 tags:
   - name: user
     description: Operations about user
 paths:
-  /:
+  /api/users/:
     get:
       tags:
         - user
@@ -45,7 +45,7 @@ paths:
              text/plain:
               schema:
                 $ref: '#/components/schemas/UserID' 
-  /{id}:
+  /api/users/{id}:
     get:
       tags:
         - user

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"net/http"
 	"project/handler"
 	"project/router"
@@ -30,7 +31,7 @@ func main() {
 	handler := handler.NewHandler(service)
 	service.SetUsers(user)
 	router := router.Init(handler)
-
+	log.Println("runnig The App on port :80")
 	http.ListenAndServe(":80", router)
 
 }

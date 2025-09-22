@@ -3,9 +3,12 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"project/service"
 	"project/structs"
+
+	"github.com/pkg/errors"
 
 	"github.com/julienschmidt/httprouter"
 )
@@ -27,9 +30,12 @@ func NewHandler(service service.Service) *Handler {
 // GetList обработчик для получения списка всех пользователей
 // GET /api/users
 func (h *Handler) GetList(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	log.Println("calling get list")
 	list := h.service.Get()
 	//Проверка длины строки
 	if len(list) == 0 {
+
+		log.Println("Not found")
 		fmt.Fprint(w, "Not found\n")
 	}
 	for key, value := range list {
@@ -45,9 +51,11 @@ func (h *Handler) GetList(w http.ResponseWriter, r *http.Request, _ httprouter.P
 // GetUser обработчик для получения конкретного пользователя по ID
 // GET /api/users/:id
 func (h *Handler) GetUser(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	log.Println("calling get user")
 	id := p.ByName("id")
 	user, err := h.service.GetUser(id)
 	if err != nil {
+		log.Println(errors.Wrap(err, "Get user error"))
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -57,9 +65,10 @@ func (h *Handler) GetUser(w http.ResponseWriter, r *http.Request, p httprouter.P
 // AddUser обработчик для создания нового пользователя
 // POST /api/users
 func (h *Handler) AddUser(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-
+	log.Println("calling add user")
 	// Проверяем наличие ошибок
 	if r.Body == nil {
+		log.Println("Add Request body is empty")
 		http.Error(w, "Request body is empty", http.StatusBadRequest)
 		return
 	}
@@ -67,6 +76,7 @@ func (h *Handler) AddUser(w http.ResponseWriter, r *http.Request, _ httprouter.P
 	var user structs.PostUserRequest
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
+		log.Println(errors.Wrap(err, "Add user error"))
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 
@@ -86,9 +96,11 @@ func (h *Handler) AddUser(w http.ResponseWriter, r *http.Request, _ httprouter.P
 // DeleteUser обработчик для удаления пользователя по ID
 // DELETE /api/users/:id
 func (h *Handler) DeleteUser(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	log.Println("calling delite user")
 	id := p.ByName("id")
 	err := h.service.Delete(id)
 	if err != nil {
+		log.Println(errors.Wrap(err, "Delet user error"))
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -98,6 +110,7 @@ func (h *Handler) DeleteUser(w http.ResponseWriter, r *http.Request, p httproute
 // UpdateUser обработчик для обновления данных пользователя
 // PUT /api/users/:id
 func (h *Handler) UpdateUser(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	log.Println("calling update user")
 	id := p.ByName("id")
 	name := r.URL.Query().Get("name")
 	lastname := r.URL.Query().Get("lastname")
@@ -105,6 +118,7 @@ func (h *Handler) UpdateUser(w http.ResponseWriter, r *http.Request, p httproute
 
 	err := h.service.UpdateUser(id, name, lastname, age)
 	if err != nil {
+		log.Println(errors.Wrap(err, "Update user error"))
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
