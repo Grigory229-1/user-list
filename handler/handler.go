@@ -31,16 +31,25 @@ func NewHandler(service service.Service) *Handler {
 // GET /api/users
 func (h *Handler) GetList(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	log.Println("calling get list")
-	list := h.service.Get()
+	list, err := h.service.Get()
+	if err != nil {
+		log.Println(errors.Wrap(err, "Get list error"))
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	//Проверка длины строки
 	if len(list) == 0 {
 
 		log.Println("Get list is empty")
 		fmt.Fprint(w, "Not found\n")
 	}
+
+	log.Println("Userlist is not empty")
 	for key, value := range list {
+		log.Printf("elentnt %d, value %v\n", key, value)
 		if value != nil {
-			fmt.Fprintf(w, "%d: %s %s, Age: %d\n", key, value.Name, value.Lastname, value.Age)
+			log.Println("Value is not nil")
+			fmt.Fprintf(w, "%d: %s %s, Age: %d\n", value.Id, value.Name, value.Lastname, value.Age)
 		} else {
 
 			fmt.Fprintf(w, "%d: [Delited user]\n", key)
@@ -57,8 +66,14 @@ func (h *Handler) GetUser(w http.ResponseWriter, r *http.Request, p httprouter.P
 	id := p.ByName("id")
 	user, err := h.service.GetUser(id)
 	if err != nil {
+		// Проверяем, является ли ошибка "пользователь не найден"
+		if isNotFoundError(err) {
+			log.Printf("User with id %v not found", id)
+			http.Error(w, "User not found", http.StatusNotFound)
+			return
+		}
 		log.Println(errors.Wrap(err, "Get user error"))
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	log.Printf("User with id %v was called succsseefuly\n", id)
@@ -92,7 +107,12 @@ func (h *Handler) AddUser(w http.ResponseWriter, r *http.Request, _ httprouter.P
 	}
 
 	//todo:получить данные из body
-	id := h.service.Post(user.Name, user.Lastname, user.Age)
+	id, err := h.service.Post(user.Name, user.Lastname, user.Age)
+	if err != nil {
+		log.Println(errors.Wrap(err, "Post user error"))
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	log.Printf("User with id %v was added succsseefuly\n", id)
 	fmt.Fprint(w, id)
 
