@@ -16,25 +16,27 @@ type TestService struct {
 }
 
 func (s *TestService) SetUsers(users []structs.User) {}
-func (s *TestService) Get() []*structs.User {
+func (s *TestService) Get() ([]*structs.User, error) {
 	return []*structs.User{
 		{
+			Id:       0,
 			Name:     "Alise",
 			Lastname: "Alise2",
 			Age:      12,
 		},
 		{
+			Id:       1,
 			Name:     "Max",
 			Lastname: "Alise2",
 			Age:      0,
 		},
-	}
+	}, nil
 }
-func (s *TestService) Post(name, lastname string, age uint) int {
+func (s *TestService) Post(name, lastname string, age uint) (int, error) {
 	if name == "Alise" {
-		return 0
+		return 0, nil
 	}
-	return 1
+	return 1, nil
 }
 func (s *TestService) Delete(idStr string) error {
 	if idStr == "1" {
@@ -51,12 +53,13 @@ func (s *TestService) UpdateUser(idStr string, name, lastname string, age string
 func (s *TestService) GetUser(idStr string) (*structs.User, error) {
 	if idStr == "0" {
 		return &structs.User{
+			Id:       0,
 			Name:     "Alise",
 			Lastname: "Alise2",
 			Age:      12,
 		}, nil
 	}
-	return nil, errors.New("user not found")
+	return nil, errors.New("user ID does not exist")
 }
 
 func NewTestService() *TestService {
@@ -89,7 +92,7 @@ func TestGetUser(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.Equal(t, result, w.Body.String())
-	assert.Equal(t, http.StatusBadRequest, w1.Code)
+	assert.Equal(t, http.StatusNotFound, w1.Code)
 }
 
 func TestAddUser(t *testing.T) {
@@ -137,7 +140,7 @@ func TestDelitUser(t *testing.T) {
 	h.GetUser(w1, r, p1)
 
 	assert.Equal(t, http.StatusOK, w.Code)
-	assert.Equal(t, http.StatusBadRequest, w1.Code)
+	assert.Equal(t, http.StatusNotFound, w1.Code)
 }
 
 //////////////////////////////////////////////////////////

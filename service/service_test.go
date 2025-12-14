@@ -24,8 +24,8 @@ func TestDeleteSuccess(t *testing.T) {
 	err := s.Delete("0")
 	assert.NoError(t, err)
 	assert.Nil(t, s.user[0])
-	assert.Equal(t, &structs.User{Name: "Alise", Lastname: "Max", Age: 20}, s.user[1])
-	assert.Equal(t, &structs.User{Name: "Max", Lastname: "Max", Age: 20}, s.user[2])
+	assert.Equal(t, &structs.User{Id: 1, Name: "Alise", Lastname: "Max", Age: 20}, s.user[1])
+	assert.Equal(t, &structs.User{Id: 2, Name: "Max", Lastname: "Max", Age: 20}, s.user[2])
 }
 
 func TestDeleteOutOfRange(t *testing.T) {
@@ -52,9 +52,9 @@ func TestUpdateUserSuccess(t *testing.T) {
 	})
 	err := s.UpdateUser("1", "Max", "3w", "2")
 	assert.NoError(t, err)
-	assert.Equal(t, &structs.User{Name: "Tom", Lastname: "Max", Age: 20}, s.user[0])
-	assert.Equal(t, &structs.User{Name: "Max", Lastname: "3w", Age: 2}, s.user[1])
-	assert.Equal(t, &structs.User{Name: "Max", Lastname: "Max", Age: 20}, s.user[2])
+	assert.Equal(t, &structs.User{Id: 0, Name: "Tom", Lastname: "Max", Age: 20}, s.user[0])
+	assert.Equal(t, &structs.User{Id: 1, Name: "Max", Lastname: "3w", Age: 2}, s.user[1])
+	assert.Equal(t, &structs.User{Id: 2, Name: "Max", Lastname: "Max", Age: 20}, s.user[2])
 }
 
 func TestUpdateUserOutOfRange(t *testing.T) {
@@ -80,7 +80,7 @@ func TestGetUserSuccess(t *testing.T) {
 	})
 	user, err := s.GetUser("1")
 	assert.NoError(t, err)
-	assert.Equal(t, &structs.User{Name: "Alise", Lastname: "Max", Age: 20}, user)
+	assert.Equal(t, &structs.User{Id: 1, Name: "Alise", Lastname: "Max", Age: 20}, user)
 
 }
 
@@ -99,9 +99,9 @@ func TestSetUsers(t *testing.T) {
 		{Name: "Alise", Lastname: "Max", Age: 20},
 		{Name: "Max", Lastname: "Max", Age: 20},
 	})
-	assert.Equal(t, &structs.User{Name: "Tom", Lastname: "Max", Age: 20}, s.user[0])
-	assert.Equal(t, &structs.User{Name: "Alise", Lastname: "Max", Age: 20}, s.user[1])
-	assert.Equal(t, &structs.User{Name: "Max", Lastname: "Max", Age: 20}, s.user[2])
+	assert.Equal(t, &structs.User{Id: 0, Name: "Tom", Lastname: "Max", Age: 20}, s.user[0])
+	assert.Equal(t, &structs.User{Id: 1, Name: "Alise", Lastname: "Max", Age: 20}, s.user[1])
+	assert.Equal(t, &structs.User{Id: 2, Name: "Max", Lastname: "Max", Age: 20}, s.user[2])
 
 }
 
@@ -113,10 +113,11 @@ func TestGet(t *testing.T) {
 		{Name: "Alise", Lastname: "Max", Age: 20},
 		{Name: "Max", Lastname: "Max", Age: 20},
 	})
-	users := s.Get()
-	assert.Equal(t, &structs.User{Name: "Tom", Lastname: "Max", Age: 20}, users[0])
-	assert.Equal(t, &structs.User{Name: "Alise", Lastname: "Max", Age: 20}, users[1])
-	assert.Equal(t, &structs.User{Name: "Max", Lastname: "Max", Age: 20}, users[2])
+	users, err := s.Get()
+	assert.NoError(t, err)
+	assert.Equal(t, &structs.User{Id: 0, Name: "Tom", Lastname: "Max", Age: 20}, users[0])
+	assert.Equal(t, &structs.User{Id: 1, Name: "Alise", Lastname: "Max", Age: 20}, users[1])
+	assert.Equal(t, &structs.User{Id: 2, Name: "Max", Lastname: "Max", Age: 20}, users[2])
 }
 
 func TestPost(t *testing.T) {
@@ -126,8 +127,8 @@ func TestPost(t *testing.T) {
 		{Name: "Alise", Lastname: "Max", Age: 20},
 		{Name: "Max", Lastname: "Max", Age: 20},
 	})
-	id := s.Post("Nik", "dddd", 0)
-
+	id, err := s.Post("Nik", "dddd", 0)
+	assert.NoError(t, err)
 	assert.Equal(t, 3, id)
-	assert.Equal(t, &structs.User{Name: "Nik", Lastname: "dddd", Age: 0}, s.user[id])
+	assert.Equal(t, &structs.User{Id: 3, Name: "Nik", Lastname: "dddd", Age: 0}, s.user[id])
 }

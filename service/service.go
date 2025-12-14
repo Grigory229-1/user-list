@@ -2,16 +2,18 @@ package service
 
 import (
 	"fmt"
+	"log"
 	"project/structs"
 )
 
 // Service интерфейс определяет контракт для сервиса работы с пользователями
 // Интерфейс позволяет абстрагироваться от конкретной реализации
 // и легко подменять реализацию для тестирования
+
 type Service interface {
 	SetUsers(users []structs.User)
-	Get() []*structs.User
-	Post(name, lastname string, age uint) int
+	Get() ([]*structs.User, error)
+	Post(name, lastname string, age uint) (int, error)
 	Delete(idStr string) error
 	UpdateUser(idStr string, name, lastname string, age string) error
 	GetUser(idStr string) (*structs.User, error)
@@ -20,7 +22,8 @@ type Service interface {
 // ServiceImpl - реализация интерфейса Service
 // Содержит slice указателей на User для эффективного управления памятью
 type ServiceImpl struct {
-	user []*structs.User
+	length int
+	user   []*structs.User
 }
 
 // NewService - конструктор для создания нового экземпляра ServiceImpl
@@ -29,7 +32,8 @@ type ServiceImpl struct {
 func NewService() *ServiceImpl {
 	user := make([]*structs.User, 0)
 	return &ServiceImpl{
-		user: user,
+		length: 0,
+		user:   user,
 	}
 
 }
@@ -39,6 +43,8 @@ func NewService() *ServiceImpl {
 // Это позволяет работать с оригинальными объектами, а не копиями
 func (s *ServiceImpl) SetUsers(users []structs.User) {
 	for i := 0; i < len(users); i++ {
+		users[i].Id = s.length
+		s.length++
 		s.user = append(s.user, &users[i])
 	}
 }
@@ -46,23 +52,25 @@ func (s *ServiceImpl) SetUsers(users []structs.User) {
 // Get возвращает всех пользователей в виде slice указателей
 // Позволяет получать доступ к оригинальным объектам пользователей
 // Возвращаются указатели для избежания копирования больших структур
-func (s *ServiceImpl) Get() []*structs.User {
+func (s *ServiceImpl) Get() ([]*structs.User, error) {
 
-	return s.user
+	return s.user, nil
 }
 
 // Post создает нового пользователя и добавляет его в коллекцию
 // Принимает основные данные пользователя: имя, фамилию, возраст
 // Возвращает индекс созданного пользователя в slice
 // Это упрощенная реализация - в production лучше использовать UUID
-func (s *ServiceImpl) Post(name, lastname string, age uint) int {
+func (s *ServiceImpl) Post(name, lastname string, age uint) (int, error) {
 	user := &structs.User{
+		Id:       s.length,
 		Name:     name,
 		Lastname: lastname,
 		Age:      age,
 	}
+	s.length++
 	s.user = append(s.user, user)
-	return len(s.user) - 1
+	return user.Id, nil
 
 }
 
@@ -125,6 +133,7 @@ func (s *ServiceImpl) UpdateUser(idStr string, name, lastname string, age string
 // Возвращает указатель на пользователя или ошибку если пользователь не найден
 // /////////////////////////////////////////////////////////////////////
 func (s *ServiceImpl) GetUser(idStr string) (*structs.User, error) {
+	log.Print(1111)
 	id := 0
 	_, err := fmt.Sscanf(idStr, "%d", &id)
 	if err != nil {
@@ -133,5 +142,6 @@ func (s *ServiceImpl) GetUser(idStr string) (*structs.User, error) {
 	if id >= len(s.user) || s.user[id] == nil {
 		return nil, fmt.Errorf("user ID does not exist")
 	}
+	log.Printf("Провалившйися тест %v", s.user[id])
 	return s.user[id], nil
 }
